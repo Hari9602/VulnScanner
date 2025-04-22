@@ -13,13 +13,13 @@ RUN apt-get update && apt-get -y full-upgrade && apt-get install -y \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-# Download and install python-nmap from source
-RUN wget https://xael.org/norman/python/python-nmap/python-nmap-0.7.1.tar.gz && \
+# Install python-nmap from GitHub release
+RUN wget https://github.com/nmmapper/python-nmap/archive/refs/tags/0.7.1.tar.gz -O python-nmap-0.7.1.tar.gz && \
     tar xzf python-nmap-0.7.1.tar.gz && \
     cd python-nmap-0.7.1 && \
     python3 setup.py install
 
-# Install remaining Python requirements
+# Install remaining requirements
 RUN pip3 install --no-cache-dir requests==2.31.0
 
 # Configure exploitdb
