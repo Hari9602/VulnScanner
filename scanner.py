@@ -45,27 +45,44 @@ def search_exploits(service, version):
 
 # Main function
 def main():
-    target = input("Enter target IP or domain: ")
-    scan_results = aggressive_scan(target)
-    
-    if not scan_results:
-        logging.info("No open ports found.")
-        return
-    
-    selected_port = int(input(f"Select an open port from {list(scan_results.keys())} to list vulnerabilities: "))
-    if selected_port not in scan_results:
-        logging.error("Invalid port selection.")
-        return
-    
-    service = scan_results[selected_port]['service']
-    version = scan_results[selected_port]['version']
-    exploits = search_exploits(service, version)
-    
-    report_content = f"Target: {target}\nPort: {selected_port}\nService: {service}\nVersion: {version}\n\nExploits:\n{exploits}"
-    
-    with open("scan_report.txt", "w") as f:
-        f.write(report_content)
-    logging.info("Scan completed! Report saved as scan_report.txt")
+    try:
+        target = input("Enter target IP or domain: ")
+        # Basic validation for target
+        if not target or target.isspace():
+            logging.error("Invalid target. Please provide a valid IP or domain.")
+            return
 
-if __name__ == "__main__":
-    main()
+        scan_results = aggressive_scan(target)
+        
+        if not scan_results:
+            logging.info("No open ports found.")
+            return
+            
+        # Show available ports
+        print(f"Available open ports: {list(scan_results.keys())}")
+        
+        try:
+            selected_port = int(input(f"Select an open port from above to list vulnerabilities: "))
+            if selected_port not in scan_results:
+                logging.error("Invalid port selection.")
+                return
+        except ValueError:
+            logging.error("Please enter a valid port number.")
+            return
+            
+        service = scan_results[selected_port]['service']
+        version = scan_results[selected_port]['version']
+        
+        exploits = search_exploits(service, version)
+        
+        report_content = f"Target: {target}\nPort: {selected_port}\nService: {service}\nVersion: {version}\n\nExploits:\n{exploits}"
+        
+        with open("scan_report.txt", "w") as f:
+            f.write(report_content)
+            
+        logging.info("Scan completed! Report saved as scan_report.txt")
+        
+    except KeyboardInterrupt:
+        logging.info("Scan interrupted by user.")
+    except Exception as e:
+        logging.error(f"An unexpected error occurred: {e}")
