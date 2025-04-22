@@ -9,13 +9,14 @@ RUN apt-get update && apt-get -y upgrade && apt-get install -y \
     exploitdb \
     git \
     python3-dev \
+    build-essential \
+    python3-venv \
     && rm -rf /var/lib/apt/lists/*
 
-
-# Configure pipx for Python applications
+# Configure pipx environment
 ENV PATH="/root/.local/bin:${PATH}"
-RUN pipx ensurepath
-
+RUN pipx ensurepath && \
+    pipx upgrade-all  # Critical update step
 
 # Install Python dependencies using pipx
 WORKDIR /app
