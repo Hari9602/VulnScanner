@@ -8,16 +8,13 @@ RUN apt-get update && apt-get -y full-upgrade && apt-get install -y \
     git \
     && rm -rf /var/lib/apt/lists/*
 
-# Install exploitdb from source (GitHub)
-RUN git clone https://github.com/offensive-security/exploitdb.git /opt/exploitdb && \
-    ln -sf /opt/exploitdb/searchsploit /usr/local/bin/searchsploit && \
-    cp -n /opt/exploitdb/.searchsploit_rc ~/
-
-# Configure Git before updating
+# Configure Git and install exploitdb
 RUN git config --global init.defaultBranch main && \
-    git -C /opt/exploitdb config core.filemode false
+    git config --global advice.detachedHead false && \
+    git clone https://github.com/offensive-security/exploitdb.git /opt/exploitdb && \
+    ln -sf /opt/exploitdb/searchsploit /usr/local/bin/searchsploit
 
-# Update exploitdb
+# Update exploitdb database
 RUN searchsploit -u
 
 # Copy application files
