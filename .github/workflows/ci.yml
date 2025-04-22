@@ -8,7 +8,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: hari9602/vulnscanner  # Critical lowercase fix
+  IMAGE_NAME: hari9602/vulnscanner
 
 jobs:
   build-push:
@@ -37,7 +37,7 @@ jobs:
           context: .
           push: true
           tags: |
-            ghcr.io/hari9602/vulnscanner:latest  # Lowercase enforcement
+            ghcr.io/hari9602/vulnscanner:latest
             ghcr.io/hari9602/vulnscanner:${{ github.sha }}
           labels: |
             org.opencontainers.image.source=https://github.com/Hari9602/VulnScanner
