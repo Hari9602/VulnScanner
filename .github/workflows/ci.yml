@@ -8,7 +8,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: Hari9602/VulnScanner  # Your specific repo path
+  IMAGE_NAME: Hari9602/vulnscanner  # Your specific repo path
 
 jobs:
   build-push:
