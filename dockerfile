@@ -1,25 +1,26 @@
 FROM kalilinux/kali-rolling
 
-# Install system dependencies
+# Install system packages
 RUN apt-get update && apt-get -y full-upgrade && apt-get install -y \
     python3 \
-    python3-nmap \
+    python3-pip \
     nmap \
     exploitdb \
     git \
     && rm -rf /var/lib/apt/lists/*
 
-# Configure exploitdb
-RUN ln -s /usr/share/exploitdb/searchsploit /usr/local/bin/searchsploit && \
-    searchsploit -u
+# Configure exploitdb properly
+RUN searchsploit -u  # Updates database without symlink creation
 
-# Install Python requirements
+# Set working directory
 WORKDIR /app
-COPY requirements.txt .
-RUN pip3 install --no-cache-dir -r requirements.txt
 
 # Copy application files
+COPY requirements.txt .
 COPY scanner.py .
+
+# Install Python dependencies
+RUN pip3 install --no-cache-dir -r requirements.txt
 
 # Entry point
 ENTRYPOINT ["python3", "scanner.py"]
