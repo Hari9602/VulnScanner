@@ -1,30 +1,33 @@
 FROM kalilinux/kali-rolling
 
-# Update system and install core dependencies
+# Install system dependencies
 RUN apt-get update && apt-get -y full-upgrade && apt-get install -y \
     python3 \
     python3-pip \
     nmap \
     exploitdb \
     git \
+    wget \
+    tar \
     python3-dev \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-# Configure environment
-WORKDIR /app
+# Download and install python-nmap from source
+RUN wget https://xael.org/norman/python/python-nmap/python-nmap-0.7.1.tar.gz && \
+    tar xzf python-nmap-0.7.1.tar.gz && \
+    cd python-nmap-0.7.1 && \
+    python3 setup.py install
 
-# Install Python modules directly
-RUN pip3 install --no-cache-dir \
-    python-nmap==0.7.1 \
-    requests==2.31.0
+# Install remaining Python requirements
+RUN pip3 install --no-cache-dir requests==2.31.0
 
-# Configure exploitdb tools
+# Configure exploitdb
 RUN ln -s /usr/share/exploitdb/searchsploit /usr/local/bin/searchsploit && \
     searchsploit -u
 
 # Copy application files
+WORKDIR /app
 COPY scanner.py .
 
-# Set entrypoint
 ENTRYPOINT ["python3", "scanner.py"]
