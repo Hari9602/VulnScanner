@@ -8,7 +8,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: Hari9602/vulnscanner  # Your specific repo path
+  IMAGE_NAME: hari9602/vulnscanner  # Critical lowercase fix
 
 jobs:
   build-push:
@@ -37,7 +37,14 @@ jobs:
           context: .
           push: true
           tags: |
-            ghcr.io/Hari9602/VulnScanner:latest
-            ghcr.io/Hari9602/VulnScanner:${{ github.sha }}
+            ghcr.io/hari9602/vulnscanner:latest  # Lowercase enforcement
+            ghcr.io/hari9602/vulnscanner:${{ github.sha }}
           labels: |
             org.opencontainers.image.source=https://github.com/Hari9602/VulnScanner
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Verify pushed image
+        run: |
+          docker pull ghcr.io/hari9602/vulnscanner:latest
+          docker run --rm ghcr.io/hari9602/vulnscanner:latest --help
