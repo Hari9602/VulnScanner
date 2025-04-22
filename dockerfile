@@ -1,7 +1,9 @@
-FROM python:3.10-slim
+FROM kalilinux/kali-rolling
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
+# Update and install system dependencies
+RUN apt-get update && apt-get -y upgrade && apt-get install -y \
+    python3 \
+    python3-pip \
     nmap \
     exploitdb \
     git \
@@ -15,10 +17,11 @@ COPY requirements.txt .
 COPY scanner.py .
 
 # Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip3 install --no-cache-dir -r requirements.txt
 
-# Add searchsploit to PATH (ensure it works)
-RUN ln -s /usr/share/exploitdb/searchsploit /usr/local/bin/searchsploit
+# Verify searchsploit installation and add to PATH if needed
+RUN searchsploit -u && \
+    chmod +x /usr/bin/searchsploit
 
 # Entry point
-CMD ["python", "scanner.py"]
+ENTRYPOINT ["python3", "scanner.py"]
