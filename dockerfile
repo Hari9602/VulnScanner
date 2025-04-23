@@ -17,4 +17,4 @@ WORKDIR /app
 COPY vuln_scanner.py /app/
 
 # Execution configuration
-ENTRYPOINT ["python3", "-u", "vuln_scanner.py"]
+ENTRYPOINT ["python3", "-u", "scanner.py"]
