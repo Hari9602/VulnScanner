@@ -1,5 +1,10 @@
 name: VulnScanner CI/CD
 
+# Top-level permissions for all jobs
+permissions:
+  contents: read
+  packages: write  # Grants read+write for GHCR
+
 on:
   push:
     branches: [main]
@@ -8,15 +13,13 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: hari9602/vulnscanner
-
-permissions:  # <-- moved here, top-level for job
-  contents: read
-  packages: write
+  IMAGE_NAME: hari9602/vulnscanner  # Must match your repo name
 
 jobs:
   build-push:
     runs-on: ubuntu-latest
+    # Skip fork PRs to avoid permission issues
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
 
     steps:
       - name: Checkout code
@@ -28,24 +31,25 @@ jobs:
       - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.repository_owner }}  # Critical for org repos
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
           context: .
-          push: ${{ github.event_name != 'pull_request' }}
+          push: ${{ github.event_name == 'push' }}
           tags: |
-            ghcr.io/hari9602/vulnscanner:latest
-            ghcr.io/hari9602/vulnscanner:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
           labels: |
-            org.opencontainers.image.source=https://github.com/Hari9602/VulnScanner
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
       - name: Verify pushed image
+        if: github.event_name == 'push'
         run: |
-          docker pull ghcr.io/hari9602/vulnscanner:latest
-          docker run --rm ghcr.io/hari9602/vulnscanner:latest --help
+          docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          docker run --rm ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest --help
