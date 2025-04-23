@@ -1,4 +1,4 @@
-## Dockerfile for Python Vulnerability Scanner (Updated Filename)
+## Dockerfile for Python Vulnerability Scanner (Fixed COPY Command)
 FROM kalilinux/kali-rolling:latest
 
 # Install essential tools with error handling
@@ -18,7 +18,9 @@ RUN mkdir -p /usr/share/exploitdb && \
 
 # Configure workspace
 WORKDIR /app
-COPY scanner.py /app/  # Updated filename reference
+
+# Corrected COPY command (comment moved to separate line)
+COPY scanner.py /app/
 
 # Set entrypoint
-ENTRYPOINT ["python3", "-u", "scanner.py"]  # Updated filename reference
+ENTRYPOINT ["python3", "-u", "scanner.py"]
