@@ -1,19 +1,27 @@
-FROM kalilinux/kali-rolling:latest
+FROM kalilinux/kali-rolling
 
-# Update and upgrade system, install Python3 and pipx
+# Install apt-get and required packages, then set up a venv and Python deps
 RUN apt-get update && \
-    apt-get upgrade -y && \
-    apt-get install -y python3 pipx && \
-    pipx ensurepath && \
-    pipx install python-nmap && \
-    apt-get clean && \
+    apt-get full-upgrade -y && \
+    apt-get install -y \
+      python3 \
+      python3-venv \
+      python3-pip \
+      nmap \
+      exploitdb \
+      git && \
     rm -rf /var/lib/apt/lists/*
 
-# Set working directory
-WORKDIR /app
+# Create and activate virtualenv, install Python packages
+RUN python3 -m venv /opt/venv && \
+    /opt/venv/bin/pip install --upgrade pip && \
+    /opt/venv/bin/pip install python-nmap
 
-# Copy your scanner script into the container
-COPY scanner.py /app/
+# Copy your scanner script into the image
+COPY scanner.py /opt/scanner.py
+WORKDIR /opt
 
-# Set entrypoint
-ENTRYPOINT ["python3", "scanner.py"]
+# Set the venv python as default
+ENV PATH="/opt/venv/bin:$PATH"
+
+ENTRYPOINT ["python", "scanner.py"]
