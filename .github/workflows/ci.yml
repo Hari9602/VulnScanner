@@ -10,12 +10,13 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: hari9602/vulnscanner
 
+permissions:  # <-- moved here, top-level for job
+  contents: read
+  packages: write
+
 jobs:
   build-push:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
 
     steps:
       - name: Checkout code
@@ -35,7 +36,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          push: true
+          push: ${{ github.event_name != 'pull_request' }}
           tags: |
             ghcr.io/hari9602/vulnscanner:latest
             ghcr.io/hari9602/vulnscanner:${{ github.sha }}
