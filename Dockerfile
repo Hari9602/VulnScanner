@@ -1,30 +1,27 @@
-FROM kalilinux/kali-rolling:latest
+FROM kalilinux/kali-rolling
 
-# Install core dependencies
-RUN apt-get update --fix-missing && \
-    apt-get install -y --no-install-recommends \
-    python3 \
-    pipx \
-    nmap \
-    python3-nmap \
-    exploitdb \
-    ca-certificates \
-    apt-transport-https \
-    git \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+# Install apt-get and required packages, then set up a venv and Python deps
+RUN apt-get update && \
+    apt-get full-upgrade -y && \
+    apt-get install -y \
+      python3 \
+      python3-venv \
+      python3-pip \
+      nmap \
+      exploitdb \
+      git && \
+    rm -rf /var/lib/apt/lists/*
 
-# Configure pipx and python-nmap
-RUN pipx ensurepath && \
-    pipx install python-nmap
+# Create and activate virtualenv, install Python packages
+RUN python3 -m venv /opt/venv && \
+    /opt/venv/bin/pip install --upgrade pip && \
+    /opt/venv/bin/pip install python-nmap
 
-# Initialize exploit database
-RUN mkdir -p /usr/share/exploitdb && \
-    searchsploit --update || [ $? -eq 6 ]
+# Copy your scanner script into the image
+COPY scanner.py /opt/scanner.py
+WORKDIR /opt
 
-# Set working directory and copy code
-WORKDIR /app
-COPY scanner.py /app/
+# Set the venv python as default
+ENV PATH="/opt/venv/bin:$PATH"
 
-# Entrypoint configuration
-ENTRYPOINT ["python3", "-u", "scanner.py"]
+ENTRYPOINT ["python", "scanner.py"]
