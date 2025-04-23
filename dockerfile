@@ -1,22 +1,20 @@
-FROM kalilinux/kali-rolling
+## Dockerfile for Python Vulnerability Scanner
+FROM kalilinux/kali-rolling:latest
 
-# Update system and create virtual environment
-RUN apt update && apt full-upgrade -y \
-    && python3 -m venv /opt/venv \
-    && /opt/venv/bin/python -m pip install --upgrade pip \
-    && apt clean \
+# Install essential tools and dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    nmap \
+    python3-nmap \
+    exploit-db \
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Set up exploitdb for searchsploit
-RUN ln -s /usr/share/exploitdb/ /opt/exploit-database \
-    && ln -sf /usr/bin/searchsploit /usr/local/bin/searchsploit
+# Update exploit database (consider runtime update for freshness)
+RUN searchsploit --update
 
-# Set virtual environment PATH
-ENV PATH="/opt/venv/bin:$PATH"
-
+# Set working directory and copy code
 WORKDIR /app
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-COPY scanner.py .
+COPY vuln_scanner.py /app/
 
-ENTRYPOINT ["python3", "scanner.py"]
+# Execution configuration
+ENTRYPOINT ["python3", "-u", "vuln_scanner.py"]
