@@ -1,20 +1,24 @@
-## Dockerfile for Python Vulnerability Scanner
+## Dockerfile for Python Vulnerability Scanner (Updated Filename)
 FROM kalilinux/kali-rolling:latest
 
-# Install essential tools and dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# Install essential tools with error handling
+RUN apt-get update --fix-missing && \
+    apt-get install -y --no-install-recommends \
     nmap \
     python3-nmap \
-    exploit-db \
+    exploitdb \
+    ca-certificates \
+    apt-transport-https \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Update exploit database (consider runtime update for freshness)
-RUN searchsploit --update
+# Initialize exploit database
+RUN mkdir -p /usr/share/exploitdb && \
+    searchsploit --update
 
-# Set working directory and copy code
+# Configure workspace
 WORKDIR /app
-COPY scanner.py /app/
+COPY scanner.py /app/  # Updated filename reference
 
-# Execution configuration
-ENTRYPOINT ["python3", "-u", "scanner.py"]
+# Set entrypoint
+ENTRYPOINT ["python3", "-u", "scanner.py"]  # Updated filename reference
