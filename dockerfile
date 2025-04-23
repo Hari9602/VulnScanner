@@ -1,7 +1,9 @@
 FROM kalilinux/kali-rolling
 
-# Update system and install Python dependencies
+# Update system and create virtual environment
 RUN apt update && apt full-upgrade -y \
+    && python3 -m venv /opt/venv \
+    && /opt/venv/bin/python -m pip install --upgrade pip \
     && apt clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -9,9 +11,12 @@ RUN apt update && apt full-upgrade -y \
 RUN ln -s /usr/share/exploitdb/ /opt/exploit-database \
     && ln -sf /usr/bin/searchsploit /usr/local/bin/searchsploit
 
+# Set virtual environment PATH
+ENV PATH="/opt/venv/bin:$PATH"
+
 WORKDIR /app
 COPY requirements.txt .
-RUN pip3 install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 COPY scanner.py .
 
 ENTRYPOINT ["python3", "scanner.py"]
