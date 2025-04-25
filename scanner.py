@@ -1,7 +1,7 @@
 import nmap
 import logging
 import subprocess
-import re
+import argparse
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -10,7 +10,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 def aggressive_scan(target):
     scanner = nmap.PortScanner()
     logging.info(f"Performing aggressive scan on {target}...")
-    scanner.scan(target, arguments="-T4 -A -sV --version-intensity 9 --script=version -Pn")  # Improved detection
+    scanner.scan(target, arguments="-T4 -A -sV --version-intensity 9 --script=version -Pn")
     
     results = {}
     for host in scanner.all_hosts():
@@ -24,7 +24,6 @@ def aggressive_scan(target):
                 logging.info(f"Port {port} ({service}) - Version: {version} - State: {state}")
                 if state == 'open':
                     results[port] = {"service": service, "version": version}
-    
     return results
 
 # Function to search for exploits using searchsploit
@@ -43,20 +42,29 @@ def search_exploits(service, version):
         logging.error(f"Error using searchsploit for {service} {version}: {e}")
         return "Error retrieving exploits."
 
-# Main function
+# Main function using argparse
 def main():
-    target = input("Enter target IP or domain: ")
+    parser = argparse.ArgumentParser(description="Vulnerability Scanner using Nmap and SearchSploit")
+    parser.add_argument("target", help="Target IP or domain")
+    parser.add_argument("--port", type=int, help="Open port to analyze for vulnerabilities (optional)")
+
+    args = parser.parse_args()
+    target = args.target
+    selected_port = args.port
+
     scan_results = aggressive_scan(target)
     
     if not scan_results:
         logging.info("No open ports found.")
         return
-    
-    selected_port = int(input(f"Select an open port from {list(scan_results.keys())} to list vulnerabilities: "))
-    if selected_port not in scan_results:
-        logging.error("Invalid port selection.")
+
+    if selected_port is None:
+        selected_port = next(iter(scan_results))  # Pick first open port by default
+        logging.info(f"No port specified. Using default open port: {selected_port}")
+    elif selected_port not in scan_results:
+        logging.error(f"Invalid port selection: {selected_port}. Available: {list(scan_results.keys())}")
         return
-    
+
     service = scan_results[selected_port]['service']
     version = scan_results[selected_port]['version']
     exploits = search_exploits(service, version)
@@ -65,6 +73,7 @@ def main():
     
     with open("scan_report.txt", "w") as f:
         f.write(report_content)
+
     logging.info("Scan completed! Report saved as scan_report.txt")
 
 if __name__ == "__main__":
