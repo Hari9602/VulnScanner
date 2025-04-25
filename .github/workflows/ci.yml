@@ -1,6 +1,5 @@
 name: VulnScanner CI/CD
 
-# Permissions (optional for Docker Hub; required for GHCR)
 permissions:
   contents: read
 
@@ -16,6 +15,7 @@ env:
 jobs:
   build-push:
     runs-on: ubuntu-latest
+
     # Skip fork PRs to avoid permission issues
     if: github.event_name == 'push' || github.pull_request.head.repo.full_name == github.repository
 
@@ -32,7 +32,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push
+      - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -43,8 +43,9 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Verify pushed image
+      - name: Verify pushed image (non-interactive scan)
         if: github.event_name == 'push'
         run: |
           docker pull ${{ env.IMAGE_NAME }}:latest
-          docker run --rm ${{ env.IMAGE_NAME }}:latest --help
+          # Replace scanme.nmap.org with a valid test target if needed
+          docker run --rm ${{ env.IMAGE_NAME }}:latest scanme.nmap.org --port 80
