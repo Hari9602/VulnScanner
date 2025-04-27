@@ -10,7 +10,7 @@ on:
     branches: [main]
 
 env:
-  IMAGE_NAME: hari9602/vulnscanner  # Replace with your Docker Hub image name
+  IMAGE_NAME: hari9602/vulnscanner
 
 jobs:
   build-push:
@@ -47,5 +47,4 @@ jobs:
         if: github.event_name == 'push'
         run: |
           docker pull ${{ env.IMAGE_NAME }}:latest
-          # Replace scanme.nmap.org with a valid test target if needed
           docker run --rm ${{ env.IMAGE_NAME }}:latest scanme.nmap.org --port 80
