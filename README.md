@@ -1,4 +1,4 @@
-# 🔍 VulnScanner: Python-Based DevOps Vulnerability Scanner
+# 🔍 VulnScanner: DevOps Vulnerability Scanner
 
 VulnScanner is a lightweight, extensible vulnerability scanner built using Python, Nmap, and SearchSploit. It leverages containerization (Docker) and DevOps principles (CI/CD using GitHub Actions) to offer efficient vulnerability scanning and exploit matching in modern development pipelines.
 
